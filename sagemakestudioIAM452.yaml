@@ -142,59 +142,6 @@ Resources:
           ToPort: 2049
           CidrIp: 0.0.0.0/0
   
-  StudioDomain:
-    DependsOn: SageMakerExecutionRole
-    Type: AWS::SageMaker::Domain
-    Properties:
-      AuthMode: IAM
-      DefaultUserSettings:
-        CodeEditorAppSettings:
-          DefaultResourceSpec:
-           InstanceType: !Ref CodeEditorInstanceType
-        ExecutionRole: !GetAtt SageMakerExecutionRole.Arn
-        StudioWebPortal: ENABLED
-      DomainName: MyBuilderSessionDomain
-      SubnetIds: 
-        - !Ref PublicSubnet
-      VpcId: !Ref PubPrivateVPC
-
-  UserProfile:
-    DependsOn: StudioDomain
-    Type: AWS::SageMaker::UserProfile
-    Properties:
-      DomainId: !GetAtt StudioDomain.DomainId
-      UserProfileName: !Ref UserProfileName
-      UserSettings: 
-        CodeEditorAppSettings:
-          DefaultResourceSpec:
-           InstanceType: !Ref CodeEditorInstanceType
-           SageMakerImageArn: !FindInMap [RegionMap, !Ref "AWS::Region", HVM64]
-        ExecutionRole: !GetAtt SageMakerExecutionRole.Arn
-        SecurityGroups: 
-          - !Ref SecurityGroup
-        StudioWebPortal: ENABLED
-
-  UserSpace:
-   DependsOn: UserProfile
-   Type: AWS::SageMaker::Space
-   Properties:
-     DomainId: !GetAtt StudioDomain.DomainId
-     OwnershipSettings: 
-       OwnerUserProfileName: !Ref UserProfileName
-     SpaceName: BuilderSession
-     SpaceDisplayName: BuilderSession 
-     SpaceSettings: 
-       AppType: CodeEditor
-       CodeEditorAppSettings:
-         DefaultResourceSpec:
-           InstanceType: !Ref CodeEditorInstanceType
-           SageMakerImageArn: !FindInMap [RegionMap, !Ref "AWS::Region", HVM64]
-       SpaceStorageSettings:
-         EbsStorageSettings:
-           EbsVolumeSizeInGb: 5
-     SpaceSharingSettings: 
-       SharingType: Private
-
   IAM452ArtifactBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete 
@@ -258,4 +205,4 @@ Outputs:
 
   VpcID:
     Description: VPC ID
-    Value: !Ref PubPrivateVPC
+    Value: !Ref PubPrivateVPC 
